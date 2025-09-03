@@ -11,6 +11,7 @@
 @layer components {
   .card-flip {
     perspective: 1000px;
+    touch-action: pan-y; /* Allow vertical scrolling but handle horizontal swipes */
   }
   
   .card-inner {
@@ -20,6 +21,7 @@
     text-align: center;
     transition: transform 0.6s;
     transform-style: preserve-3d;
+    user-select: none; /* Prevent text selection during swipes */
   }
   
   .card-flip.flipped .card-inner {
@@ -37,6 +39,22 @@
   
   .card-back {
     transform: rotateY(180deg);
+  }
+
+  /* Mobile touch improvements */
+  @media (max-width: 768px) {
+    .card-flip {
+      -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+    }
+    
+    .card-inner {
+      -webkit-touch-callout: none; /* Disable callout on iOS */
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none; /* Standard property */
+    }
   }
 }
 

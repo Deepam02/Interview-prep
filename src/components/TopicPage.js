@@ -9,6 +9,10 @@ const TopicPage = () => {
   const [flippedCards, setFlippedCards] = useState(new Set());
   const [showingAnswer, setShowingAnswer] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Touch/Swipe state
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
   const topicTitles = {
     'core-java': 'Core Java Concepts',
@@ -87,6 +91,34 @@ const TopicPage = () => {
         break;
       default:
         break;
+    }
+  };
+
+  // Touch handlers for swipe gestures
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null); // reset end position
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentIndex < questions.length - 1) {
+      // Left swipe - go to next question
+      handleNext();
+    } else if (isRightSwipe && currentIndex > 0) {
+      // Right swipe - go to previous question  
+      handlePrevious();
     }
   };
 
@@ -174,6 +206,9 @@ const TopicPage = () => {
           <div 
             className={`card-flip ${showingAnswer ? 'flipped' : ''} cursor-pointer`}
             onClick={handleCardFlip}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
           >
             <div className="card-inner h-96">
               {/* Front of card (Question) */}
@@ -186,7 +221,8 @@ const TopicPage = () => {
                     {currentQuestion.question}
                   </h2>
                   <div className="mt-8 text-sm opacity-80">
-                    Click or press Space to reveal answer
+                    <div>Click or press Space to reveal answer</div>
+                    <div className="mt-2 md:hidden text-xs">Swipe left/right to navigate</div>
                   </div>
                 </div>
               </div>
@@ -201,7 +237,8 @@ const TopicPage = () => {
                     {currentQuestion.answer}
                   </div>
                   <div className="mt-8 text-sm text-gray-500">
-                    Click or press Space to see question again
+                    <div>Click or press Space to see question again</div>
+                    <div className="mt-2 md:hidden text-xs">Swipe left/right to navigate</div>
                   </div>
                 </div>
               </div>
@@ -270,21 +307,46 @@ const TopicPage = () => {
           )}
         </div>
 
-        {/* Keyboard Shortcuts */}
+        {/* Controls Info */}
         <div className="bg-white rounded-lg p-6 shadow-md">
-          <h3 className="font-semibold text-gray-800 mb-3">Keyboard Shortcuts</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="flex items-center space-x-2">
-              <kbd className="px-2 py-1 bg-gray-100 rounded border text-xs">Space</kbd>
-              <span className="text-gray-600">Flip card</span>
+          <h3 className="font-semibold text-gray-800 mb-3">Navigation Controls</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Desktop Controls */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Desktop</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center space-x-2">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded border text-xs">Space</kbd>
+                  <span className="text-gray-600">Flip card</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded border text-xs">←</kbd>
+                  <span className="text-gray-600">Previous</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <kbd className="px-2 py-1 bg-gray-100 rounded border text-xs">→</kbd>
+                  <span className="text-gray-600">Next</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <kbd className="px-2 py-1 bg-gray-100 rounded border text-xs">←</kbd>
-              <span className="text-gray-600">Previous</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <kbd className="px-2 py-1 bg-gray-100 rounded border text-xs">→</kbd>
-              <span className="text-gray-600">Next</span>
+
+            {/* Mobile Controls */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Mobile</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">👆 Tap</span>
+                  <span className="text-gray-600">Flip card</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">👈 Swipe</span>
+                  <span className="text-gray-600">Next question</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">👉 Swipe</span>
+                  <span className="text-gray-600">Previous question</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
