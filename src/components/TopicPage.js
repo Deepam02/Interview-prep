@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { javaQuestions, getAllJavaQuestions, shuffleArray } from '../data/javaQuestions';
 
@@ -58,26 +58,26 @@ const TopicPage = () => {
     setIsLoading(false);
   }, [topic]);
 
-  const handleCardFlip = () => {
+  const handleCardFlip = useCallback(() => {
     setShowingAnswer(!showingAnswer);
     setFlippedCards(prev => new Set([...prev, currentIndex]));
-  };
+  }, [showingAnswer, currentIndex]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setShowingAnswer(false);
     }
-  };
+  }, [currentIndex, questions.length]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
       setShowingAnswer(false);
     }
-  };
+  }, [currentIndex]);
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = useCallback((e) => {
     switch(e.key) {
       case ' ':
         e.preventDefault();
@@ -92,21 +92,21 @@ const TopicPage = () => {
       default:
         break;
     }
-  };
+  }, [handleCardFlip, handleNext, handlePrevious]);
 
   // Touch handlers for swipe gestures
   const minSwipeDistance = 50;
 
-  const onTouchStart = (e) => {
+  const onTouchStart = useCallback((e) => {
     setTouchEnd(null); // reset end position
     setTouchStart(e.targetTouches[0].clientX);
-  };
+  }, []);
 
-  const onTouchMove = (e) => {
+  const onTouchMove = useCallback((e) => {
     setTouchEnd(e.targetTouches[0].clientX);
-  };
+  }, []);
 
-  const onTouchEnd = () => {
+  const onTouchEnd = useCallback(() => {
     if (!touchStart || !touchEnd) return;
     
     const distance = touchStart - touchEnd;
@@ -120,12 +120,12 @@ const TopicPage = () => {
       // Right swipe - go to previous question  
       handlePrevious();
     }
-  };
+  }, [touchStart, touchEnd, currentIndex, questions.length, handleNext, handlePrevious]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentIndex, showingAnswer, questions.length]);
+  }, [handleKeyPress]);
 
   if (isLoading) {
     return (
