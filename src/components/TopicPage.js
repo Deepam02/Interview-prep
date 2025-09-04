@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { javaQuestions, getAllJavaQuestions, shuffleArray } from '../data/javaQuestions';
+import { Link, useParams, useLocation } from 'react-router-dom';
+import { javaQuestions, getAllJavaQuestions } from '../data/javaQuestions';
+import { dbmsQuestions, getAllDbmsQuestions, shuffleArray } from '../data/dbmsQuestions';
 
 const TopicPage = () => {
   const { topic } = useParams();
+  const location = useLocation();
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flippedCards, setFlippedCards] = useState(new Set());
@@ -14,49 +16,81 @@ const TopicPage = () => {
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
 
+  // Determine subject from URL path
+  const isJava = location.pathname.includes('/java');
+  const isDbms = location.pathname.includes('/dbms');
+
   const topicTitles = {
+    // Java topics
     'core-java': 'Core Java Concepts',
     'oops': 'Object-Oriented Programming',
     'memory': 'Memory & Execution',
     'exception-handling': 'Exception Handling',
     'multithreading': 'Multithreading & Concurrency',
     'collections': 'Collections Framework',
-    'random': 'Random Questions Challenge'
+    // DBMS topics
+    'basics': 'DBMS Basics',
+    'sql-basics': 'SQL Fundamentals',
+    'normalization': 'Normalization & Design',
+    'transactions': 'Transactions & Concurrency',
+    'indexing': 'Indexing & Optimization',
+    'advanced': 'Advanced Concepts',
+    // Random
+    'random': isJava ? 'Random Java Questions' : 'Random DBMS Questions'
   };
 
   const topicIcons = {
+    // Java topics
     'core-java': '☕',
     'oops': '🏗️',
     'memory': '🧠',
     'exception-handling': '⚠️',
     'multithreading': '🔄',
     'collections': '📚',
+    // DBMS topics
+    'basics': '💾',
+    'sql-basics': '🔍',
+    'normalization': '📐',
+    'transactions': '🔄',
+    'indexing': '⚡',
+    'advanced': '🚀',
+    // Random
     'random': '🎲'
   };
 
   const topicColors = {
+    // Java topics
     'core-java': 'from-blue-500 to-indigo-600',
     'oops': 'from-green-500 to-teal-600',
     'memory': 'from-purple-500 to-pink-600',
     'exception-handling': 'from-red-500 to-orange-600',
     'multithreading': 'from-cyan-500 to-blue-600',
     'collections': 'from-yellow-500 to-orange-600',
+    // DBMS topics
+    'basics': 'from-blue-500 to-indigo-600',
+    'sql-basics': 'from-green-500 to-teal-600',
+    'normalization': 'from-purple-500 to-pink-600',
+    'transactions': 'from-red-500 to-orange-600',
+    'indexing': 'from-yellow-500 to-orange-600',
+    'advanced': 'from-cyan-500 to-blue-600',
+    // Random
     'random': 'from-indigo-500 to-purple-600'
   };
 
   useEffect(() => {
     setIsLoading(true);
     if (topic === 'random') {
-      const allQuestions = getAllJavaQuestions();
+      const allQuestions = isJava ? getAllJavaQuestions() : getAllDbmsQuestions();
       setQuestions(shuffleArray(allQuestions));
     } else {
-      setQuestions(javaQuestions[topic] || []);
+      const questionData = isJava ? javaQuestions[topic] : dbmsQuestions[topic];
+      setQuestions(questionData || []);
     }
     setCurrentIndex(0);
     setFlippedCards(new Set());
     setShowingAnswer(false);
     setIsLoading(false);
-  }, [topic]);
+  }, [topic, isJava]);
 
   const handleCardFlip = useCallback(() => {
     setShowingAnswer(!showingAnswer);
@@ -169,11 +203,13 @@ const TopicPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <Link 
-              to="/java" 
+              to={isJava ? "/java" : "/dbms"} 
               className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
             >
               <span className="text-xl">←</span>
-              <span className="font-medium text-gray-700">Back to Java</span>
+              <span className="font-medium text-gray-700">
+                Back to {isJava ? 'Java' : 'DBMS'}
+              </span>
             </Link>
             
             <div className="flex items-center space-x-4">
@@ -200,7 +236,10 @@ const TopicPage = () => {
             {topicTitles[topic]}
           </h1>
           <p className="text-gray-600">
-            {topic === 'random' ? 'Mixed questions from all Java topics' : 'Master the concepts with interactive flashcards'}
+            {topic === 'random' 
+              ? `Mixed questions from all ${isJava ? 'Java' : 'DBMS'} topics` 
+              : 'Master the concepts with interactive flashcards'
+            }
           </p>
         </div>
 
@@ -370,7 +409,7 @@ const TopicPage = () => {
                 Review Again
               </button>
               <Link
-                to="/java"
+                to={isJava ? "/java" : "/dbms"}
                 className="inline-block px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
               >
                 Choose Another Topic

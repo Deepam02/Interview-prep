@@ -19,7 +19,7 @@ const LandingPage = () => {
       icon: '🗄️',
       color: 'from-blue-400 to-indigo-500',
       textColor: 'text-white',
-      available: false
+      available: true
     },
     {
       id: 'os',
