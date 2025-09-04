@@ -18,7 +18,6 @@ const TopicPage = () => {
 
   // Determine subject from URL path
   const isJava = location.pathname.includes('/java');
-  const isDbms = location.pathname.includes('/dbms');
 
   const topicTitles = {
     // Java topics
