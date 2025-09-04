@@ -95,10 +95,8 @@ const TopicPage = () => {
   }, [handleCardFlip, handleNext, handlePrevious]);
 
   // Touch handlers for swipe gestures
-  const minSwipeDistance = 50;
-
   const onTouchStart = useCallback((e) => {
-    setTouchEnd(null); // reset end position
+    setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   }, []);
 
@@ -109,15 +107,20 @@ const TopicPage = () => {
   const onTouchEnd = useCallback(() => {
     if (!touchStart || !touchEnd) return;
     
+    const minSwipeDistance = 50;
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
+    console.log('Touch End - Distance:', distance, 'Left swipe:', isLeftSwipe, 'Right swipe:', isRightSwipe);
+
     if (isLeftSwipe && currentIndex < questions.length - 1) {
       // Left swipe - go to next question
+      console.log('Going to next question');
       handleNext();
     } else if (isRightSwipe && currentIndex > 0) {
-      // Right swipe - go to previous question  
+      // Right swipe - go to previous question
+      console.log('Going to previous question');
       handlePrevious();
     }
   }, [touchStart, touchEnd, currentIndex, questions.length, handleNext, handlePrevious]);
@@ -204,7 +207,7 @@ const TopicPage = () => {
         {/* Flashcard */}
         <div className="relative mb-8">
           <div 
-            className={`card-flip ${showingAnswer ? 'flipped' : ''} cursor-pointer`}
+            className={`card-flip ${showingAnswer ? 'flipped' : ''} cursor-pointer touch-pan-y`}
             onClick={handleCardFlip}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
